@@ -15,9 +15,10 @@ class Records:
     Class object for retrieving occurrenece records from GBIF
     """
 
-    def __init__(self, genuskey=None, year=None):
+    def __init__(self, genusname=None, genuskey=None, year=None):
 
         # store input params
+        self.genusname = genusname
         self.genuskey = genuskey
         self.year = year
 
@@ -28,18 +29,24 @@ class Records:
     def get_single_batch(self, offset=0, limit=20):
         "returns JSON result for a small batch query"
 
-        # query GBIF for genus and year
-        res = requests.get(
-            url="https://api.gbif.org/v1/occurrence/search/",
-            params={
-                "genusKey": self.genuskey,
+        params = {
                 "year": self.year,
                 "offset": offset,
                 "limit": limit,
                 "hasCoordinate": "true",
                 "country": "US",
                 }
-            )
+        if self.genuskey:
+            params["genuskey"] = self.genuskey
+        elif self.genusname:
+            params["q"] = self.genusname
+            params["rank"] = "GENUS"
+
+        # query GBIF for genus and year
+        res = requests.get(
+            url="https://api.gbif.org/v1/occurrence/search/",
+            params=params
+        )
         return res.json()
 
     def get_all_records(self):
@@ -75,4 +82,4 @@ class Records:
 
 
 if __name__ == "__main__":
-    Records(genuskey=1340278, year="1980,1985")
+    Records(genusname="Bombus", genuskey=1340278, year="1980,1985")
