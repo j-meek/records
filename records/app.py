@@ -7,6 +7,8 @@ A web app to learn how to use web apps.
 import json
 import pandas as pd
 from fastapi import FastAPI
+from records.records import Records
+
 
 # create the app as an instance of the fastAPI class
 app = FastAPI()
@@ -41,3 +43,11 @@ def iris(species=None):
     sdata = data.to_json(orient="index")
     jdata = json.loads(sdata)
     return jdata
+
+
+# create an endpoint to query GBIF
+@app.get("/gbif")
+def gbif(genuskey=3171670, year="2000,2020"):
+    "returns a specific gbif query as JSON"
+    rec = Records(genuskey=genuskey, year=year)
+    return rec.get_single_batch()
